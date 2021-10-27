@@ -1,0 +1,32 @@
+package com.example.usercenter;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+@RestController
+public class TestController {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private LoadBalancerClient loadBalancerClient;
+
+    @GetMapping("/test")
+    public String test() {
+        String forObject = this.restTemplate.getForObject("http://product-center/getInfo", String.class);
+        return forObject;
+    }
+
+    @GetMapping("/lb")
+    public String getLb(){
+        ServiceInstance choose = loadBalancerClient.choose("product-center");
+        String serviceId = choose.getServiceId();
+        int port = choose.getPort();
+        return serviceId + " : "+port;
+    }
+}
